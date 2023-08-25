@@ -1,0 +1,14 @@
+services:
+  laravel-base:
+    image: laraveldevbose/laravel-base:php-8.1
+    build:
+      context: ../
+      dockerfile: docker/base/base.Dockerfile
+      args:
+        - COMPOSER_FILE_PATH=../codes
+        - TIMEZONE=${APP_TIMEZONE}
+        - PHP_VERSION=8.1-fpm
+    restart: no
+    env_file:
+      - .envs/php-fpm.env
+      - .envs/php-ini.env

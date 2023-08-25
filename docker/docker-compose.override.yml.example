@@ -1,0 +1,93 @@
+networks:
+  common-net:
+    external: true
+
+services:
+  node:
+    container_name: ${PROJECT_NAME}-node-container
+    build:
+      args:
+        - PUSHER_APP_KEY=${PUSHER_APP_KEY}
+        - PUSHER_APP_CLUSTER=${PUSHER_APP_CLUSTER}
+        - PUSHER_APP_HOST=${PUSHER_APP_HOST}
+    env_file:
+      - .envs/node.env
+    volumes:
+      - ../codes:/var/www/html
+    ports:
+      - ${VUE_PUBLISH_PORT}:${VUE_PUBLISH_PORT}
+
+  app:
+    container_name: ${PROJECT_NAME}-app-container
+    build:
+      args:
+        - EXTRA_INSTALL_APT_PACKAGES=${APP_EXTRA_INSTALL_APT_PACKAGES}
+        - EXTRA_INSTALL_PHP_EXTENSIONS=${APP_EXTRA_INSTALL_PHP_EXTENSIONS}
+    env_file:
+      - .envs/php-ini.env
+      - .envs/php-fpm.env
+      - .envs/app.env
+    volumes:
+      - ../codes:/var/www/html
+    restart: no
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      default:
+      common-net:
+        aliases:
+          - ${PROJECT_NAME}-app-common
+  web:
+    container_name: ${PROJECT_NAME}-web-container
+    env_file:
+      - .envs/web.env
+    environment:
+      - NGINX_VHOST_UPSTREAM_PHPFPM_SERVICE_HOST_PORT=${PROJECT_NAME}-app:9000
+      - WEBSOCKET_SERVICE_HOST_PORT=${PROJECT_NAME}-websocket:${WEB_SOCKET_PORT}
+    ports:
+      - ${HTTP_PUBLISH_PORT}:8080
+      - ${HTTPS_PUBLISH_PORT}:8443
+    restart: no
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      shotayu-net:
+        aliases:
+         - ${PROJECT_NAME}-web-common
+
+  artisan:
+    build:
+      context: ../
+      dockerfile: docker/app/app.Dockerfile
+      args:
+        - NODE_IMAGE_NAME=${COMPOSE_PROJECT_NAME}_node
+        - NODE_IMAGE_TAG=${DOCKER_BUILD_MODE}
+        - TIMEZONE=${APP_TIMEZONE}
+        - UID=${UID}
+        - GID=${GID}
+    env_file:
+      - .envs/app.env
+    tty: true
+    restart: no
+    entrypoint: ["php", "var/www/html/artisan"]
+    volumes:
+      - ../codes:/var/www/html
+
+
+  queue:
+    container_name: ${PROJECT_NAME}-queue-container
+    restart: "no"
+    volumes:
+      - ../codes:/var/www/html
+
+  websocket:
+    container_name: ${PROJECT_NAME}-websocket-container
+    environment:
+      - WEBSOCKET_RUN_PORT=${WEB_SOCKET_PORT:-3030}
+    restart: "no"
+    volumes:
+      - ../codes:/var/www/html
+    networks:
+      common-net:
+        aliases:
+          - ${PROJECT_NAME}-websocket-common

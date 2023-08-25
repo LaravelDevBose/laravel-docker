@@ -1,0 +1,65 @@
+version: "3.8"
+
+networks:
+  shotayu-net:
+
+services:
+  node:
+    image: ${COMPOSE_PROJECT_NAME}_node:${DOCKER_BUILD_MODE:-prod}
+    build:
+      context: ../
+      dockerfile: docker/node/node.Dockerfile
+      args:
+        - TIMEZONE=${APP_TIMEZONE}
+        - UID=${UID}
+        - GID=${GID}
+    tty: true
+    restart: 'no'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      shotayu-net:
+        aliases:
+          - ${PROJECT_NAME}-node
+
+  app:
+    image: ${COMPOSE_PROJECT_NAME}_app:${DOCKER_BUILD_MODE:-prod}
+    build:
+      context: ../
+      dockerfile: docker/app/app.Dockerfile
+      args:
+        - NODE_IMAGE_NAME=${COMPOSE_PROJECT_NAME}_node
+        - NODE_IMAGE_TAG=${DOCKER_BUILD_MODE}
+        - TIMEZONE=${APP_TIMEZONE}
+        - UID=${UID}
+        - GID=${GID}
+    env_file:
+      - .envs/app.env
+    tty: true
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      shotayu-net:
+        aliases:
+          - shotayu-app
+
+  web:
+    image: ${COMPOSE_PROJECT_NAME}_web:${DOCKER_BUILD_MODE:-prod}
+    build:
+      context: ../
+      dockerfile: docker/web/web.Dockerfile
+      args:
+        - BASE_IMAGE_NAME=${COMPOSE_PROJECT_NAME}_node
+        - BASE_IMAGE_TAG=${DOCKER_BUILD_MODE}
+        - TIMEZONE=${APP_TIMEZONE}
+        - UID=${UID}
+        - GID=${GID}
+    tty: true
+    restart: always
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      shotayu-net:
+        aliases:
+         - ${PROJECT_NAME}-web
