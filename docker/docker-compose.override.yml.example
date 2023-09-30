@@ -37,6 +37,9 @@ services:
       common-net:
         aliases:
           - ${PROJECT_NAME}-app-common
+    depends_on:
+      - web
+    
   web:
     container_name: ${PROJECT_NAME}-web-container
     env_file:
@@ -54,40 +57,30 @@ services:
       shotayu-net:
         aliases:
          - ${PROJECT_NAME}-web-common
+    depends_on:
+      - node
 
   artisan:
-    build:
-      context: ../
-      dockerfile: docker/app/app.Dockerfile
-      args:
-        - NODE_IMAGE_NAME=${COMPOSE_PROJECT_NAME}_node
-        - NODE_IMAGE_TAG=${DOCKER_BUILD_MODE}
-        - TIMEZONE=${APP_TIMEZONE}
-        - UID=${UID}
-        - GID=${GID}
+    image: ${COMPOSE_PROJECT_NAME}_app:${DOCKER_BUILD_MODE:-prod}
     env_file:
+      - .envs/php-ini.env
+      - .envs/php-fpm.env
       - .envs/app.env
     tty: true
     restart: no
-    entrypoint: ["php", "var/www/html/artisan"]
+    entrypoint: ["php", "/var/www/html/artisan"]
     volumes:
       - ../codes:/var/www/html
 
 
-  queue:
-    container_name: ${PROJECT_NAME}-queue-container
-    restart: "no"
-    volumes:
-      - ../codes:/var/www/html
-
-  websocket:
-    container_name: ${PROJECT_NAME}-websocket-container
-    environment:
-      - WEBSOCKET_RUN_PORT=${WEB_SOCKET_PORT:-3030}
-    restart: "no"
-    volumes:
-      - ../codes:/var/www/html
-    networks:
-      common-net:
-        aliases:
-          - ${PROJECT_NAME}-websocket-common
+  # queue:
+  #   image: ${COMPOSE_PROJECT_NAME}_app:${DOCKER_BUILD_MODE:-prod}
+  #   env_file:
+  #     - .envs/php-ini.env
+  #     - .envs/php-fpm.env
+  #     - .envs/app.env
+  #   tty: true
+  #   restart: no
+  #   command: ["php", "artisan", "queue:work"]
+  #   volumes:
+  #     - ../codes:/var/www/html

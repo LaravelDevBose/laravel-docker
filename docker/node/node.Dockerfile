@@ -39,9 +39,9 @@ COPY --chown=app:app ./codes/webpack.mix.js ./codes/webpack.config.js ./codes/ta
 
 RUN npm ci --ignore-scripts --no-audit
 
-RUN npm run dev
+#RUN npm run dev
 
 # Unset Proxy ENVs
 ENV TZ=""
 
-CMD [ "npm", "run", "watch" ]
+CMD [ "npm", "run", "dev" ]
