@@ -35,15 +35,14 @@ RUN groupadd --gid ${GID} app \
 ENV NGINX_CONF_USER="app app" \
     NGINX_CONF_HTTP_CLIENT_MAX_BODY_SIZE="2m" \
     NGINX_VHOST_DNS_RESOLVER_IP="127.0.0.11" \
-    NGINX_VHOST_ENABLE_HTTP_TRAFFIC="false" \
-    NGINX_VHOST_ENABLE_HTTPS_TRAFFIC="true" \
-    NGINX_VHOST_UPSTREAM_PHPFPM_SERVICE_HOST_PORT="shotayu-app:9000" \
+    NGINX_VHOST_ENABLE_HTTP_TRAFFIC="true" \
+    NGINX_VHOST_ENABLE_HTTPS_TRAFFIC="false" \
+    NGINX_VHOST_UPSTREAM_PHPFPM_SERVICE_HOST_PORT="bizevery-app:9000" \
     NGINX_VHOST_SSL_CERTIFICATE="/etc/ssl/certs/ssl-cert-snakeoil.pem" \
     NGINX_VHOST_SSL_CERTIFICATE_KEY="/etc/ssl/certs/ssl-cert-snakeoil.key" \
     NGINX_VHOST_HTTP_SERVER_NAME="_" \
     NGINX_VHOST_HTTPS_SERVER_NAME="_" \
-    NGINX_VHOST_FASTCGI_PARAM_X_FORWARDED_PORT="8080" \
-    WEBSOCKET_SERVICE_HOST_PORT="shotayu-websocket:3030"
+    NGINX_VHOST_FASTCGI_PARAM_X_FORWARDED_PORT="8080"
 
 # Add Nginx Configs
 COPY --chown=app:app ./docker/web/nginx.conf /etc/nginx/nginx.conf
@@ -65,9 +64,8 @@ COPY --chown=app:app ./codes/public ./public
 
 # --from does not support ARG
 # Ref: https://stackoverflow.com/a/69303997
-COPY --chown=app:app --from=node-build /var/www/html/public/js ./public/js
-COPY --chown=app:app --from=node-build /var/www/html/public/css ./public/css
-COPY --chown=app:app --from=node-build /var/www/html/public/mix-manifest.json ./public/mix-manifest.json
+COPY --chown=app:app --from=node-build /var/www/html/public/build ./public/build
+COPY --chown=app:app --from=node-build /var/www/html/public/build-* ./public/
 
 # set permission so can user run entrypoint.sh and change ownership for nginx conf file
 RUN chmod ugo+x /docker-entrypoint.sh \

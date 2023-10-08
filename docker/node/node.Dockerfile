@@ -3,18 +3,8 @@ FROM node:18.14.2-slim
 LABEL maintainer="Laravel Devbose <laravel.devbose@gmail.com>"
 
 ARG TIMEZONE="Asia/Dhaka"
-ARG PUSHER_APP_ID="arup_pusher_app"
-ARG PUSHER_APP_KEY="arup_pusher_key"
-ARG PUSHER_APP_SECRET="arup_pusher_secret"
-ARG PUSHER_APP_CLUSTER="mt1"
-ARG PUSHER_APP_HOST="localhost"
 
-ENV TZ="${TIMEZONE}" \
-    MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}" \
-    MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}" \
-    MIX_PUSHER_APP_ID="${PUSHER_APP_ID}" \
-    MIX_PUSHER_APP_SECRET="${PUSHER_APP_SECRET}" \
-    MIX_PUSHER_APP_HOST="${PUSHER_APP_HOST}"
+ENV TZ="${TIMEZONE}"
 
 USER root
 
@@ -33,13 +23,14 @@ COPY --chown=app:app ./codes/package*.json ./
 
 USER app
 
+COPY --chown=app:app ./codes/bootstrap ./bootstrap
 COPY --chown=app:app ./codes/resources ./resources
 COPY --chown=app:app ./codes/public ./public
-COPY --chown=app:app ./codes/webpack.mix.js ./codes/webpack.config.js ./codes/tailwind.config.js ./
+COPY --chown=app:app ./codes/vite.config.js  ./codes/modules_statuses.json ./
 
 RUN npm ci --ignore-scripts --no-audit
 
-#RUN npm run dev
+RUN npm run build
 
 # Unset Proxy ENVs
 ENV TZ=""

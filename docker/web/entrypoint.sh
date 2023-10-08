@@ -17,19 +17,13 @@ sed -i "s!\${NGINX_VHOST_DNS_RESOLVER_IP}!${NGINX_VHOST_DNS_RESOLVER_IP}!" /etc/
 sed -i "s!\${NGINX_VHOST_UPSTREAM_PHPFPM_SERVICE_HOST_PORT}!${NGINX_VHOST_UPSTREAM_PHPFPM_SERVICE_HOST_PORT}!" /etc/nginx/includes/loc-phpfpm.conf
 sed -i "s!\${NGINX_VHOST_FASTCGI_PARAM_X_FORWARDED_PORT}!${NGINX_VHOST_FASTCGI_PARAM_X_FORWARDED_PORT}!" /etc/nginx/includes/loc-phpfpm.conf
 
-sed -i "s!\${NGINX_VHOST_DNS_RESOLVER_IP}!${NGINX_VHOST_DNS_RESOLVER_IP}!" /etc/nginx/includes/loc-web.conf
-sed -i "s!\${NGINX_VHOST_UPSTREAM_PHPFPM_SERVICE_HOST_PORT}!${NGINX_VHOST_UPSTREAM_PHPFPM_SERVICE_HOST_PORT}!" /etc/nginx/includes/loc-web.conf
-sed -i "s!\${NGINX_VHOST_FASTCGI_PARAM_X_FORWARDED_PORT}!${NGINX_VHOST_FASTCGI_PARAM_X_FORWARDED_PORT}!" /etc/nginx/includes/loc-web.conf
 
-#sed -i "s!\${NGINX_VHOST_DNS_RESOLVER_IP}!${NGINX_VHOST_DNS_RESOLVER_IP}!" /etc/nginx/includes/loc-ws.conf
-#sed -i "s!\${WEBSOCKET_SERVICE_HOST_PORT}!${WEBSOCKET_SERVICE_HOST_PORT}!" /etc/nginx/includes/loc-ws.conf
-
-#if [ "${NGINX_VHOST_ENABLE_HTTP_TRAFFIC}" = "false" ] && [ -f "/etc/nginx/conf.d/vhost-http.conf" ]; then
-#    rm -f /etc/nginx/conf.d/vhost-http.conf
-#fi
-
-if [ "${NGINX_VHOST_ENABLE_HTTPS_TRAFFIC}" = "false" ] && [ -f "/etc/nginx/conf.d/vhost-https.conf" ]; then
-    rm -f /etc/nginx/conf.d/vhost-https.conf
+if [ "${NGINX_VHOST_ENABLE_HTTP_TRAFFIC}" = "false" ] && [ -f "/etc/nginx/conf.d/vhost-http.conf" ]; then
+    rm -f /etc/nginx/conf.d/vhost-http.conf
 fi
+#
+#if [ "${NGINX_VHOST_ENABLE_HTTPS_TRAFFIC}" = "false" ] && [ -f "/etc/nginx/conf.d/vhost-https.conf" ]; then
+#    rm -f /etc/nginx/conf.d/vhost-https.conf
+#fi
 
 exec "$@"

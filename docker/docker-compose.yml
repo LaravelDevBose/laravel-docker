@@ -1,7 +1,7 @@
 version: "3.8"
 
 networks:
-  shotayu-net:
+  bizevery-net:
 
 services:
   node:
@@ -18,7 +18,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      shotayu-net:
+      bizevery-net:
         aliases:
           - ${PROJECT_NAME}-node
 
@@ -40,9 +40,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      shotayu-net:
+      bizevery-net:
         aliases:
-          - shotayu-app
+          - bizevery-app
 
   web:
     image: ${COMPOSE_PROJECT_NAME}_web:${DOCKER_BUILD_MODE:-prod}
@@ -60,6 +60,6 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:
-      shotayu-net:
+      bizevery-net:
         aliases:
          - ${PROJECT_NAME}-web

@@ -11,22 +11,11 @@ LABEL maintainer="Laravel Devbose <laravel.devbose@gmail.com>"
 ARG TIMEZONE="Asia/Dhaka"
 ARG APP_EXTRA_INSTALL_APT_PACKAGES=""
 ARG APP_EXTRA_INSTALL_PHP_EXTENSIONS=""
-ARG PUSHER_APP_ID="arup_pusher_app"
-ARG PUSHER_APP_KEY="arup_pusher_key"
-ARG PUSHER_APP_SECRET="arup_pusher_secret"
-ARG PUSHER_APP_CLUSTER="mt1"
-ARG PUSHER_APP_HOST="shotayu-websocket"
+
 
 #setup env variables
 ENV TZ="${TIMEZONE}" \
-    CONTAINER_ROLE="app" \
-    WEBSOCKET_RUN_PORT=3030 \
-    QUEUE_RUN_MODE="work" \
-    MIX_PUSHER_APP_KEY="${PUSHER_APP_KEY}" \
-    MIX_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}" \
-    MIX_PUSHER_APP_ID="${PUSHER_APP_ID}" \
-    MIX_PUSHER_APP_SECRET="${PUSHER_APP_SECRET}" \
-    MIX_PUSHER_APP_HOST="${PUSHER_APP_HOST}"
+    CONTAINER_ROLE="app"
 
 USER root
 
@@ -38,8 +27,6 @@ RUN echo "--- Set Timezone ---" \
         && apt update \
         && apt upgrade -y \
         && apt install -V -y --no-install-recommends --no-install-suggests \
-            wkhtmltopdf \
-            supervisor \
         && if [ ! -z "${EXTRA_INSTALL_APT_PACKAGES}" ]; then \
             apt install -y "${EXTRA_INSTALL_APT_PACKAGES}" \
         ;fi \
@@ -74,19 +61,20 @@ COPY --chown=app:app ./codes/app ./app
 COPY --chown=app:app ./codes/bootstrap ./bootstrap
 COPY --chown=app:app ./codes/config ./config
 COPY --chown=app:app ./codes/database ./database
-COPY --chown=app:app ./codes/libraries ./libraries
+COPY --chown=app:app ./codes/lang ./lang
+COPY --chown=app:app ./codes/Modules ./Modules
 COPY --chown=app:app ./codes/public ./public
 COPY --chown=app:app ./codes/resources ./resources
 COPY --chown=app:app ./codes/routes ./routes
 COPY --chown=app:app ./codes/storage ./storage
 COPY --chown=app:app ./codes/artisan ./
-COPY --chown=app:app ./codes/server.php ./
-COPY --chown=app:app ./codes/eagle-d5377-firebase-adminsdk-szhdy-6629b22f9f.json ./
 
 
-COPY --chown=app:app --from=node-build /var/www/html/public/js ./public/js
-COPY --chown=app:app --from=node-build /var/www/html/public/css ./public/css
-COPY --chown=app:app --from=node-build /var/www/html/public/mix-manifest.json ./public/mix-manifest.json
+
+#COPY --chown=app:app --from=node-build /var/www/html/bootstrap/ssr ./bootstrap/ssr
+COPY --chown=app:app --from=node-build /var/www/html/public/build ./public/build
+COPY --chown=app:app --from=node-build /var/www/html/public/build-* ./public/
+COPY --chown=app:app ./codes/vite.config.js  ./codes/modules_statuses.json ./
 
 # Installing the packages here to cache them
 # So further installs from child images will
@@ -119,10 +107,10 @@ RUN chmod -R 775 /var/www/html/storage \
 
 RUN rm -rf /var/www/html/public/storage
 
-RUN echo "--- Run Artisan command ---" \
-    && composer dump-autoload \
-    && php artisan optimize:clear \
-    && php artisan storage:link
+#RUN echo "--- Run Artisan command ---" \
+#    && composer dump-autoload \
+#    && php artisan optimize:clear \
+#    && php artisan storage:link
 
 #ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
